@@ -1,0 +1,38 @@
+{
+  "benchmark_version": 1,
+  "name": "example-highlight-benchmark",
+  "description": "Demonstration manifest for future dataset-level evaluation.",
+  "annotation_policy": {
+    "version": 1,
+    "minimum_interval_seconds": 3,
+    "maximum_interval_seconds": 180,
+    "adjacent_merge_gap_seconds": 2,
+    "notes": "Replace this demonstration policy with the reviewed benchmark policy."
+  },
+  "evaluation": {
+    "iou_thresholds": [0.3, 0.5, 0.7],
+    "aggregation": ["micro", "macro"],
+    "report_boundary_error": true
+  },
+  "items": [
+    {
+      "id": "sample-001",
+      "truth": "truth/sample-001.json",
+      "prediction": "predictions/sample-001.json",
+      "duration_seconds": 3600,
+      "source_checksum": "replace-with-real-checksum"
+    },
+    {
+      "id": "sample-002",
+      "truth": "truth/sample-002.json",
+      "prediction": "predictions/sample-002.json",
+      "duration_seconds": 1800,
+      "source_checksum": "replace-with-real-checksum"
+    }
+  ],
+  "reproducibility": {
+    "clipbench_commit": "replace-with-commit-sha",
+    "prediction_system_version": "replace-with-version",
+    "created_at": "2026-06-19T00:00:00Z"
+  }
+}
