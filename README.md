@@ -1,50 +1,49 @@
 # ClipBench
 
-短视频高光片段算法的区间评测工具。项目将人工标注的真值区间与算法预测区间进行匹配，输出 IoU、Precision、Recall、F1 和平均边界误差，适合用于高光检测、直播切片和候选区间算法的回归测试。
+ClipBench is a temporal interval benchmark for highlight-detection systems. It matches reviewed ground-truth intervals against predicted intervals and reports IoU, precision, recall, F1, and mean boundary error.
 
-> 当前版本评测“时间区间是否匹配”，不评估成片审美、内容安全、事实准确性或商业价值。
+> The current release evaluates temporal agreement only. It does not measure editing quality, narrative value, factual accuracy, audience response, or business performance.
 
-## 适用场景
+## Use cases
 
-- 比较不同高光检测算法
-- 调整阈值、窗口和合并策略
-- 评估直播回放候选片段
-- 检查算法升级是否造成回归
-- 为 LiveHighlightEngine 等候选选择器建立可复现基准
+- Compare highlight-detection algorithms
+- Tune thresholds, window sizes, and merge policies
+- Evaluate candidate intervals from long recordings
+- Detect metric regressions after algorithm changes
+- Build reproducible benchmarks for LiveHighlightEngine and similar systems
 
-## 当前能力
+## Current capabilities
 
-- 计算两个时间区间的 IoU
-- 按指定 IoU 阈值匹配真值与预测区间
-- 输出 Precision、Recall、F1
-- 统计平均边界误差
-- 读取 JSON 真值和预测结果
-- 将评测结果写入 JSON 报告
-- 本地运行，无需付费 API
+- Temporal intersection-over-union calculation
+- One-to-one matching at a configurable IoU threshold
+- Precision, recall, and F1 reporting
+- Mean matched IoU
+- Mean boundary error
+- JSON input for truth and predictions
+- JSON result output
+- Local execution with no paid API
 
-## 快速开始
+## Requirements
 
-### 环境
+- Python 3.10 or newer
 
-- Python 3.10 或更高版本
-
-### 运行评测
+## Run
 
 ```bash
 python main.py examples/truth.json examples/predicted.json --threshold 0.5 -o report.json
 ```
 
-### 运行测试
+## Test
 
 ```bash
 python -m unittest -v
 ```
 
-## 输入格式
+## Input format
 
-真值和预测文件均为 JSON 数组，每个元素至少包含 `start` 与 `end`。
+Truth and prediction files are JSON arrays. Every item requires `start` and `end` values in seconds.
 
-### 真值示例
+### Ground truth
 
 ```json
 [
@@ -53,7 +52,7 @@ python -m unittest -v
 ]
 ```
 
-### 预测示例
+### Predictions
 
 ```json
 [
@@ -62,70 +61,72 @@ python -m unittest -v
 ]
 ```
 
-建议统一使用秒作为时间单位，并确保所有区间基于同一视频版本和同一时间基准。
+All files in one benchmark must use the same source version and time base.
 
-## 指标说明
+## Metrics
 
 ### Intersection over Union
 
-IoU 衡量预测区间与真值区间的重合程度：
-
 ```text
-IoU = intersection_duration / union_duration
+IoU = intersection duration / union duration
 ```
 
-当 IoU 大于或等于指定阈值时，预测可被视为一次匹配。阈值越高，对边界准确度要求越严格。
+A prediction is accepted when its IoU with an unmatched truth interval is greater than or equal to the configured threshold.
 
 ### Precision
 
-被判定为正确的预测区间占全部预测区间的比例。Precision 低通常意味着误报较多。
+The fraction of predicted intervals that were matched. Low precision indicates many unmatched predictions.
 
 ### Recall
 
-被成功匹配的真值区间占全部真值区间的比例。Recall 低通常意味着漏掉了较多高光片段。
+The fraction of truth intervals that were matched. Low recall indicates many missed reviewed moments.
 
 ### F1
 
-Precision 与 Recall 的调和平均，用于观察二者的综合平衡。
+The harmonic mean of precision and recall.
 
-### 平均边界误差
+### Mean boundary error
 
-衡量匹配区间起止点与真值边界之间的平均偏差。它能补充 IoU 无法完全表达的剪辑边界质量。
+The average absolute difference between predicted and reviewed start and end boundaries for matched pairs.
 
-## 推荐评测方法
+## Recommended evaluation workflow
 
-1. 固定视频文件和校验值。
-2. 制定统一的标注规范。
-3. 由人工标注真值区间并进行复核。
-4. 固定算法版本和配置。
-5. 在多个阈值下评测，例如 `0.3`、`0.5`、`0.7`。
-6. 分内容类型记录结果，不只看总体平均值。
-7. 保存输入、报告、代码提交和配置校验值。
+1. Freeze the source media version and checksum.
+2. Define an annotation policy.
+3. Create and review truth intervals.
+4. Freeze the prediction-system version and configuration.
+5. Evaluate at several IoU thresholds, such as `0.3`, `0.5`, and `0.7`.
+6. Report results by content category as well as overall.
+7. Preserve inputs, outputs, configuration, code commit, and checksums.
 
-## 避免误用
+## Avoiding misleading comparisons
 
-- 不要只用一个视频宣称算法整体有效。
-- 不要在看过预测结果后随意修改真值。
-- 不要混用不同剪辑版本的时间轴。
-- 不要只报告 F1 而隐藏 Precision、Recall 和边界误差。
-- 不要把区间命中等同于最终视频质量。
+- Do not claim general performance from one recording.
+- Do not revise truth intervals after viewing predictions without recording the change.
+- Do not mix timelines from different media edits.
+- Do not report only F1 while hiding precision, recall, and boundary error.
+- Do not treat interval agreement as finished-video quality.
 
-## 已知限制
+## Known limitations
 
-- 当前评测重点是时间区间，不理解片段内容。
-- 指标结果高度依赖人工标注规范。
-- 不自动处理多标注者一致性。
-- 不自动生成统计显著性结论。
-- 不评估音画质量、标题、封面、留存率或平台表现。
+- The evaluator does not understand interval content.
+- Results depend on the annotation policy.
+- Multi-annotator agreement is not calculated.
+- Confidence intervals and significance tests are not included.
+- Visual quality, titles, thumbnails, retention, and platform performance are outside scope.
 
-## 文档
+## Documentation
 
+- [Metric Reference](docs/METRICS.md)
+- [Benchmark Format](docs/BENCHMARK_FORMAT.md)
+- [Aggregation Plan](docs/AGGREGATION_PLAN.md)
+- [Reproducibility Checklist](docs/REPRODUCIBILITY_CHECKLIST.md)
 - [Maintenance Trace](MAINTENANCE_TRACE.md)
 
-## 关联项目
+## Related projects
 
-- **LiveHighlightEngine**：生成待评测的高光候选区间。
-- **FlowFFmpeg**：将确认后的区间转换为可审查的媒体处理工作流。
+- **LiveHighlightEngine** produces candidate intervals for evaluation.
+- **FlowFFmpeg** compiles approved interval workflows into inspectable media commands.
 
 ## License
 
