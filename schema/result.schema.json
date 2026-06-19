@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ClipBench Evaluation Result",
+  "type": "object",
+  "required": ["threshold", "truth", "predicted", "true_positive", "false_positive", "false_negative", "precision", "recall", "f1", "matches"],
+  "properties": {
+    "result_version": {"type": "integer", "minimum": 1},
+    "threshold": {"type": "number", "minimum": 0, "maximum": 1},
+    "truth": {"type": "integer", "minimum": 0},
+    "predicted": {"type": "integer", "minimum": 0},
+    "true_positive": {"type": "integer", "minimum": 0},
+    "false_positive": {"type": "integer", "minimum": 0},
+    "false_negative": {"type": "integer", "minimum": 0},
+    "precision": {"type": "number", "minimum": 0, "maximum": 1},
+    "recall": {"type": "number", "minimum": 0, "maximum": 1},
+    "f1": {"type": "number", "minimum": 0, "maximum": 1},
+    "mean_iou": {"type": "number", "minimum": 0, "maximum": 1},
+    "mean_boundary_error": {"type": ["number", "null"], "minimum": 0},
+    "matches": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["prediction", "truth", "iou", "boundary_error"],
+        "properties": {
+          "prediction": {"type": "integer", "minimum": 0},
+          "truth": {"type": "integer", "minimum": 0},
+          "iou": {"type": "number", "minimum": 0, "maximum": 1},
+          "boundary_error": {"type": "number", "minimum": 0}
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}
