@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Project overview
+    url: https://github.com/xinjian0101/ClipBench/blob/main/ABOUT.md
+    about: Review the benchmark mission, metric boundaries, maturity, and governance.
+  - name: Metrics and reproducibility guides
+    url: https://github.com/xinjian0101/ClipBench/tree/main/docs
+    about: Read metric definitions, benchmark format, aggregation, and reproducibility guidance.
