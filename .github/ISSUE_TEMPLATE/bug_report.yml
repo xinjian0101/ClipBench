@@ -1,0 +1,73 @@
+name: Bug report
+description: Report a reproducible interval validation, matching, metric, sweep, or aggregation defect
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use a minimal synthetic benchmark. Record the exact annotation and threshold policy.
+  - type: input
+    id: version
+    attributes:
+      label: Commit or version
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      options:
+        - Interval validation
+        - IoU calculation
+        - One-to-one matching
+        - Precision or recall
+        - F1 calculation
+        - Boundary error
+        - Threshold sweep
+        - Manifest aggregation
+        - Result output
+        - Documentation
+    validations:
+      required: true
+  - type: textarea
+    id: truth
+    attributes:
+      label: Minimal ground truth
+      render: json
+    validations:
+      required: true
+  - type: textarea
+    id: predictions
+    attributes:
+      label: Minimal predictions
+      render: json
+    validations:
+      required: true
+  - type: input
+    id: thresholds
+    attributes:
+      label: Threshold or threshold list
+      placeholder: 0.5 or 0.3,0.5,0.7
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected metrics
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual metrics
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-submission checks
+      options:
+        - label: Truth and predictions use the same source timeline and unit.
+          required: true
+        - label: The benchmark fixture is synthetic and reproducible.
+          required: true
