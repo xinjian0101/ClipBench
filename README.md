@@ -1,49 +1,76 @@
+<div align="center">
+
 # ClipBench
 
-ClipBench is a temporal interval benchmark for highlight-detection systems. It matches reviewed ground-truth intervals against predicted intervals and reports IoU, precision, recall, F1, and mean boundary error.
+**Reproducible temporal interval evaluation for highlight-detection systems.**
 
-> The current release evaluates temporal agreement only. It does not measure editing quality, narrative value, factual accuracy, audience response, or business performance.
+[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![Metrics](https://img.shields.io/badge/Metrics-IoU%20%7C%20Precision%20%7C%20Recall%20%7C%20F1-0969da)](docs/METRICS.md)
+[![License](https://img.shields.io/badge/License-MIT-2ea44f)](LICENSE)
+[![Status](https://img.shields.io/badge/Status-Active%20MVP-f59e0b)](MAINTENANCE_TRACE.md)
 
-## Use cases
+[Quick start](#quick-start) · [Metrics](#metric-reference) · [Threshold sweeps](#threshold-sweeps) · [Aggregation](#dataset-level-aggregation) · [About](ABOUT.md)
 
-- Compare highlight-detection algorithms
-- Tune thresholds, window sizes, and merge policies
-- Evaluate candidate intervals from long recordings
-- Detect metric regressions after algorithm changes
-- Build reproducible benchmarks for LiveHighlightEngine and similar systems
+</div>
 
-## Current capabilities
+---
 
-- Temporal intersection-over-union calculation
-- One-to-one matching at a configurable IoU threshold
-- Precision, recall, and F1 reporting
-- Mean matched IoU
-- Mean boundary error
-- JSON input for truth and predictions
-- JSON result output
-- Local execution with no paid API
+ClipBench evaluates predicted highlight intervals against reviewed ground truth. It provides strict interval validation, one-to-one matching, configurable IoU thresholds, threshold sweeps, per-item results, and dataset-level micro and macro aggregation.
 
-## Requirements
+> [!NOTE]
+> Temporal agreement is not the same as editing quality, narrative value, factual accuracy, audience retention, or commercial performance.
 
-- Python 3.10 or newer
+## At a glance
 
-## Run
+| Area | Current support |
+|---|---|
+| Input | JSON arrays of intervals |
+| Matching | One-to-one, best unmatched IoU |
+| Metrics | Precision, recall, F1, mean IoU, boundary error |
+| Thresholds | Single value or sorted multi-value sweep |
+| Dataset evaluation | Manifest-based micro and macro aggregation |
+| Reports | Versioned JSON |
+| Runtime | Python standard library |
+
+## Quick start
+
+Evaluate one prediction file:
 
 ```bash
-python main.py examples/truth.json examples/predicted.json --threshold 0.5 -o report.json
+python main.py examples/truth.json examples/predicted.json \
+  --threshold 0.5 \
+  -o report.json
 ```
 
-## Test
+Evaluate several thresholds:
+
+```bash
+python main.py examples/truth.json examples/predicted.json \
+  --thresholds 0.3,0.5,0.7 \
+  -o sweep-report.json
+```
+
+Run tests:
 
 ```bash
 python -m unittest -v
 ```
 
+## Capability matrix
+
+| Capability | Status | Notes |
+|---|---:|---|
+| Strict interval validation | ✅ | Finite, non-negative, positive duration |
+| One-to-one matching | ✅ | Each truth interval used once |
+| Threshold sweep | ✅ | Sorted and deduplicated |
+| Per-match audit details | ✅ | Prediction index, truth index, IoU, error |
+| Dataset aggregation | ✅ | Micro and macro summaries |
+| Multi-annotator agreement | ⏳ | Not implemented |
+| Content-quality scoring | ❌ | Intentionally outside scope |
+
 ## Input format
 
-Truth and prediction files are JSON arrays. Every item requires `start` and `end` values in seconds.
-
-### Ground truth
+Truth and prediction files contain JSON arrays:
 
 ```json
 [
@@ -52,81 +79,96 @@ Truth and prediction files are JSON arrays. Every item requires `start` and `end
 ]
 ```
 
-### Predictions
+All files in one benchmark must use the same source version, edit, timeline, and unit.
 
-```json
-[
-  {"start": 11.0, "end": 25.0},
-  {"start": 58.0, "end": 76.0}
-]
+## Metric reference
+
+| Metric | Meaning |
+|---|---|
+| IoU | Intersection duration divided by union duration |
+| Precision | Matched predictions divided by all predictions |
+| Recall | Matched truth intervals divided by all truth intervals |
+| F1 | Harmonic mean of precision and recall |
+| Mean IoU | Average IoU across matched pairs |
+| Boundary error | Average start/end boundary difference for matches |
+
+## Threshold sweeps
+
+```bash
+python main.py truth.json predictions.json --thresholds 0.3,0.5,0.7
 ```
 
-All files in one benchmark must use the same source version and time base.
+Sweep reports include the normalized threshold list, a complete result for every threshold, and the best F1 result. Report all thresholds used when comparing systems.
 
-## Metrics
+## Dataset-level aggregation
 
-### Intersection over Union
-
-```text
-IoU = intersection duration / union duration
+```bash
+python aggregate.py examples/benchmark-manifest.json \
+  -o aggregate-report.json
 ```
 
-A prediction is accepted when its IoU with an unmatched truth interval is greater than or equal to the configured threshold.
+Aggregation reports preserve:
 
-### Precision
+- per-item results;
+- micro precision, recall, and F1;
+- macro precision, recall, and F1;
+- macro mean IoU;
+- macro boundary error;
+- the threshold used for each summary.
 
-The fraction of predicted intervals that were matched. Low precision indicates many unmatched predictions.
+Run the built-in aggregation self-test:
 
-### Recall
-
-The fraction of truth intervals that were matched. Low recall indicates many missed reviewed moments.
-
-### F1
-
-The harmonic mean of precision and recall.
-
-### Mean boundary error
-
-The average absolute difference between predicted and reviewed start and end boundaries for matched pairs.
+```bash
+python aggregate.py --self-test
+```
 
 ## Recommended evaluation workflow
 
-1. Freeze the source media version and checksum.
-2. Define an annotation policy.
-3. Create and review truth intervals.
-4. Freeze the prediction-system version and configuration.
-5. Evaluate at several IoU thresholds, such as `0.3`, `0.5`, and `0.7`.
-6. Report results by content category as well as overall.
-7. Preserve inputs, outputs, configuration, code commit, and checksums.
+```text
+freeze source media and checksum
+      ↓
+define annotation policy
+      ↓
+review ground-truth intervals
+      ↓
+freeze prediction version and config
+      ↓
+evaluate multiple IoU thresholds
+      ↓
+inspect per-item failures
+      ↓
+publish reproducible aggregate report
+```
 
-## Avoiding misleading comparisons
+## Repository map
+
+| Path | Purpose |
+|---|---|
+| `main.py` | Interval validation, matching, metrics, and threshold sweeps |
+| `aggregate.py` | Manifest-based dataset aggregation |
+| `examples/` | Truth, predictions, and benchmark manifest |
+| `schema/` | Result contract |
+| `docs/` | Metrics, format, aggregation, and reproducibility |
+| `test_*.py` | Core metric and sweep tests |
+| `ABOUT.md` | Mission, maturity, boundaries, and governance |
+
+## Avoid misleading comparisons
 
 - Do not claim general performance from one recording.
-- Do not revise truth intervals after viewing predictions without recording the change.
-- Do not mix timelines from different media edits.
+- Do not change truth labels after viewing predictions without recording the revision.
+- Do not mix timelines from different edits.
 - Do not report only F1 while hiding precision, recall, and boundary error.
-- Do not treat interval agreement as finished-video quality.
-
-## Known limitations
-
-- The evaluator does not understand interval content.
-- Results depend on the annotation policy.
-- Multi-annotator agreement is not calculated.
-- Confidence intervals and significance tests are not included.
-- Visual quality, titles, thumbnails, retention, and platform performance are outside scope.
+- Do not present interval accuracy as finished-video quality.
 
 ## Documentation
 
-- [Metric Reference](docs/METRICS.md)
-- [Benchmark Format](docs/BENCHMARK_FORMAT.md)
-- [Aggregation Plan](docs/AGGREGATION_PLAN.md)
-- [Reproducibility Checklist](docs/REPRODUCIBILITY_CHECKLIST.md)
-- [Maintenance Trace](MAINTENANCE_TRACE.md)
-
-## Related projects
-
-- **LiveHighlightEngine** produces candidate intervals for evaluation.
-- **FlowFFmpeg** compiles approved interval workflows into inspectable media commands.
+- [About the project](ABOUT.md)
+- [Metric reference](docs/METRICS.md)
+- [Benchmark format](docs/BENCHMARK_FORMAT.md)
+- [Aggregation plan](docs/AGGREGATION_PLAN.md)
+- [Reproducibility checklist](docs/REPRODUCIBILITY_CHECKLIST.md)
+- [Maintenance trace](MAINTENANCE_TRACE.md)
+- [Changelog](CHANGELOG.md)
 
 ## License
 
