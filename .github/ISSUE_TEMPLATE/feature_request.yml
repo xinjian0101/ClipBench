@@ -1,0 +1,69 @@
+name: Feature request
+description: Propose a metric, matching, threshold, manifest, aggregation, or reproducibility improvement
+title: "[Feature]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Begin with the evaluation problem. Metric changes require formal definitions, fixed fixtures, and compatibility analysis.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Feature area
+      options:
+        - Interval validation
+        - Matching policy
+        - Metric definition
+        - Threshold sweep
+        - Result schema
+        - Benchmark manifest
+        - Dataset aggregation
+        - Statistical analysis
+        - Format adapter
+        - Reproducibility workflow
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Evaluation problem
+      description: Describe the benchmark failure mode or missing analysis.
+    validations:
+      required: true
+  - type: textarea
+    id: definition
+    attributes:
+      label: Proposed metric or behavior
+      description: Include a precise definition, matching policy, and empty-input behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: fixture
+    attributes:
+      label: Minimal truth and prediction fixture
+      render: json
+    validations:
+      required: true
+  - type: textarea
+    id: compatibility
+    attributes:
+      label: Result-schema and comparison impact
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+    validations:
+      required: true
+  - type: checkboxes
+    id: boundaries
+    attributes:
+      label: Benchmark checks
+      options:
+        - label: The proposal preserves the distinction between temporal accuracy and content quality.
+          required: true
+        - label: Truth and predictions use one documented timeline and unit.
+          required: true
+        - label: Existing comparisons and result-schema compatibility were considered.
+          required: true
