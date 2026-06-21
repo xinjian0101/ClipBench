@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use ClipBench, cite this repository and the exact commit used."
+title: "ClipBench"
+type: software
+authors:
+  - name: "xinjian0101"
+repository-code: "https://github.com/xinjian0101/ClipBench"
+url: "https://github.com/xinjian0101/ClipBench/blob/main/ABOUT.md"
+license: MIT
+keywords:
+  - benchmark
+  - temporal evaluation
+  - IoU
+  - precision recall
+  - highlight detection
+abstract: "A reproducible temporal interval benchmark with strict validation, matching, metric sweeps, per-item results, and dataset aggregation."
